@@ -52,7 +52,7 @@
         </div>
         <button
           type="submit"
-          class="rounded-lg bg-red-700 px-5 py-2 font-semibold text-white hover:bg-red-800 focus:outline-2 focus:outline-offset-2 focus:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          class="rounded-lg border border-transparent bg-red-700 px-5 py-2 font-semibold sm:mt-6 text-white hover:bg-red-800 focus:outline-2 focus:outline-offset-2 focus:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
           [disabled]="subscribeForm.email().invalid() || status() === 'sending'"
         >
           {{ status() === 'sending' ? 'Sending…' : 'Send' }}
