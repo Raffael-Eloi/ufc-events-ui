@@ -29,24 +29,31 @@
         If you want to be notified when a new UFC event comes out, add your email to the list.
       </p>
 
-      <form class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end" (ngSubmit)="sendUfcEvents()">
+      <form class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start" [formRoot]="subscribeForm">
         <div class="flex-1">
           <label for="email" class="block text-sm font-medium text-slate-800">Your email</label>
           <input
             id="email"
-            name="email"
             type="email"
-            required
             autocomplete="email"
             placeholder="you@example.com"
             class="mt-1 block w-full rounded-lg border border-slate-400 px-3 py-2 text-slate-900 placeholder:text-slate-600 focus:border-red-700 focus:outline-2 focus:outline-offset-2 focus:outline-red-700"
-            [(ngModel)]="email"
+            aria-describedby="email-errors"
+            [attr.aria-invalid]="subscribeForm.email().invalid() && subscribeForm.email().touched()"
+            [formField]="subscribeForm.email"
           />
+          <div id="email-errors" class="mt-1 min-h-5 text-sm font-medium text-red-800">
+            @if (subscribeForm.email().invalid() && subscribeForm.email().touched()) {
+              @for (error of subscribeForm.email().errors(); track error.kind) {
+                <span>{{ error.message }}</span>
+              }
+            }
+          </div>
         </div>
         <button
           type="submit"
           class="rounded-lg bg-red-700 px-5 py-2 font-semibold text-white hover:bg-red-800 focus:outline-2 focus:outline-offset-2 focus:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-          [disabled]="status() === 'sending'"
+          [disabled]="subscribeForm.email().invalid() || status() === 'sending'"
         >
           {{ status() === 'sending' ? 'Sending…' : 'Send' }}
         </button>

@@ -1,33 +1,42 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { email, form, FormField, FormRoot, required } from '@angular/forms/signals';
+import { firstValueFrom } from 'rxjs';
 import { SendUfcEvents } from '../../services/send-ufc-events';
 
 type SubmitStatus = 'idle' | 'sending' | 'success' | 'error';
 
 @Component({
-  imports: [FormsModule],
+  imports: [FormField, FormRoot],
   selector: 'app-home',
   styleUrl: './home.css',
   templateUrl: './home.html',
 })
 export class Home {
   private readonly service = inject(SendUfcEvents);
+  private readonly model = signal({ email: '' });
 
-  protected readonly email = signal('');
   protected readonly status = signal<SubmitStatus>('idle');
 
-  protected sendUfcEvents() {
-    if (this.status() === 'sending') {
-      return;
-    }
-
-    this.status.set('sending');
-    this.service.send(this.email()).subscribe({
-      next: () => {
-        this.status.set('success');
-        this.email.set('');
+  protected readonly subscribeForm = form(
+    this.model,
+    (path) => {
+      required(path.email, { message: 'Email is required' });
+      email(path.email, { message: 'Enter a valid email address' });
+    },
+    {
+      submission: {
+        action: async () => {
+          this.status.set('sending');
+          try {
+            await firstValueFrom(this.service.send(this.subscribeForm.email().value()));
+            this.status.set('success');
+            this.subscribeForm().reset({ email: '' });
+          } catch {
+            this.status.set('error');
+          }
+        },
+        onInvalid: () => this.subscribeForm.email().markAsTouched(),
       },
-      error: () => this.status.set('error'),
-    });
-  }
+    },
+  );
 }
